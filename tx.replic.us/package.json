@@ -1,0 +1,23 @@
+{
+  "name": "tx.replic.us",
+  "version": "1.0.0",
+  "license": "MIT",
+  "scripts": {
+    "build": "node_modules/.bin/webpack --config tx.replic.us.webpack.config.js",
+    "deploy": "cp -R dist ../deployment-processor/dist/public"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.1.6",
+    "@babel/preset-env": "^7.1.6",
+    "@babel/preset-react": "^7.0.0",
+    "babel-loader": "^8.0.4",
+    "copy-webpack-plugin": "^4.6.0",
+    "webpack": "^4.26.0",
+    "webpack-cli": "^3.1.2"
+  },
+  "dependencies": {
+    "react": "^16.6.3",
+    "react-dom": "^16.6.3",
+    "react-markdown": "^4.0.3"
+  }
+}

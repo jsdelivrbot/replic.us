@@ -1,0 +1,20 @@
+branch-defaults:
+  default:
+    environment: deployment-processor-dev
+    group_suffix: null
+environment-defaults:
+  deployment-processor-dev:
+    branch: null
+    repository: null
+global:
+  application_name: deployment-processor
+  default_ec2_keyname: null
+  default_platform: docker
+  default_region: null
+  include_git_submodules: true
+  instance_profile: null
+  platform_name: null
+  platform_version: null
+  profile: eb-cli
+  sc: null
+  workspace_type: Application

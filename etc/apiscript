@@ -1,0 +1,334 @@
+#!/bin/bash
+set -xe
+
+
+aws route53 create-hosted-zone --name 'replic.us' --caller-reference 'replic.us2' --hosted-zone-config Comment="comment"
+
+{
+    "Location": "https://route53.amazonaws.com/2013-04-01/hostedzone/Z10SLYU4F30AH3",
+    "HostedZone": {
+        "Id": "/hostedzone/Z10SLYU4F30AH3",
+        "Name": "replic.us.",
+        "CallerReference": "replic.us2",
+        "Config": {
+            "Comment": "comment",
+            "PrivateZone": false
+        },
+        "ResourceRecordSetCount": 2
+    },
+    "ChangeInfo": {
+        "Id": "/change/CQAM9VWO5RPXK",
+        "Status": "PENDING",
+        "SubmittedAt": "2018-11-24T20:57:28.076Z"
+    },
+    "DelegationSet": {
+        "NameServers": [
+            "ns-1002.awsdns-61.net",
+            "ns-453.awsdns-56.com",
+            "ns-1095.awsdns-08.org",
+            "ns-1997.awsdns-57.co.uk"
+        ]
+    }
+}
+
+aws route53 list-hosted-zones-by-name --dns-name 'ericaxxmae.org.' --max-items 1
+
+
+aws route53 list-hosted-zones-by-name --dns-name 'replic.us.' --max-items 1
+
+{
+    "HostedZones": [
+        {
+            "Id": "/hostedzone/Z10SLYU4F30AH3",
+            "Name": "replic.us.",
+            "CallerReference": "replic.us2",
+            "Config": {
+                "Comment": "comment",
+                "PrivateZone": false
+            },
+            "ResourceRecordSetCount": 2
+        }
+    ],
+    "DNSName": "replic.us.",
+    "IsTruncated": false,
+    "MaxItems": "1"
+}
+
+aws route53 get-hosted-zone --id '/hostedzone/Z10SLYU4F30AH3'
+{
+    "HostedZone": {
+        "Id": "/hostedzone/Z10SLYU4F30AH3",
+        "Name": "replic.us.",
+        "CallerReference": "replic.us2",
+        "Config": {
+            "Comment": "comment",
+            "PrivateZone": false
+        },
+        "ResourceRecordSetCount": 2
+    },
+    "DelegationSet": {
+        "NameServers": [
+            "ns-1002.awsdns-61.net",
+            "ns-453.awsdns-56.com",
+            "ns-1095.awsdns-08.org",
+            "ns-1997.awsdns-57.co.uk"
+        ]
+    }
+}
+
+/mnt/c/Users/landon/src/replic.us master*
+❯ aws route53 change-resource-record-sets --hosted-zone-id Z6W9XBDNJNPHZ
+--change-batch=file://change-resource-record-sets.json
+{
+    "ChangeInfo": {
+        "Id": "/change/C1R81HBDV71YRM",
+        "Status": "PENDING",
+        "SubmittedAt": "2018-11-25T01:15:49.264Z"
+    }
+}
+
+/mnt/c/Users/landon/src/replic.us master*
+❯ aws route53 change-resource-record-sets --hosted-zone-id Z6W9XBDNJNPHZ
+--change-batch=file://change-resource-record-sets.2.json
+{
+    "ChangeInfo": {
+        "Id": "/change/C2FDIKQWW5OGQQ",
+        "Status": "PENDING",
+        "SubmittedAt": "2018-11-25T01:16:36.693Z"
+    }
+}
+
+aws --region us-east-1 acm request-certificate --domain-name replic.us --validation-method DNS
+
+{
+    "CertificateArn": "arn:aws:acm:us-west-2:428807192824:certificate/49e2a1e9-2a60-4b12-91d2-7ce5c4a205ea"
+}
+
+aws --region us-west-1 acm describe-certificate --certificate-arn arn:aws:acm:us-west-2:428807192824:certificate/49e2a1e9-2a60-4b12-91d2-7ce5c4a205ea
+
+{
+    "Certificate": {
+        "CertificateArn": "arn:aws:acm:us-west-2:428807192824:certificate/49e2a1e9-2a60-4b12-91d2-7ce5c4a205ea",
+        "DomainName": "replic.us",
+        "SubjectAlternativeNames": [
+            "replic.us"
+        ],
+        "DomainValidationOptions": [
+            {
+                "DomainName": "replic.us",
+                "ValidationStatus": "PENDING_VALIDATION",
+                "ResourceRecord": {
+                    "Name": "_342e7618f0a376362f54816b3ece04fd.replic.us.",
+                    "Type": "CNAME",
+                    "Value": "_8af4c8e2460fec769ae7e295409868c1.tljzshvwok.acm-validations.aws."
+                },
+                "ValidationMethod": "DNS"
+            }
+        ],
+        "Subject": "CN=replic.us",
+        "CreatedAt": 1543095476.0,
+        "Status": "PENDING_VALIDATION",
+        "KeyAlgorithm": "RSA-2048",
+        "SignatureAlgorithm": "SHA256WITHRSA",
+        "InUseBy": [],
+        "Type": "AMAZON_ISSUED",
+        "KeyUsages": [],
+        "ExtendedKeyUsages": [],
+        "RenewalEligibility": "INELIGIBLE",
+        "Options": {
+            "CertificateTransparencyLoggingPreference": "ENABLED"
+        }
+    }
+}
+
+aws cloudfront create-distribution --distribution-config file://distribution-config.json
+
+aws --region us-west-2 s3api create-bucket --bucket replic.us --acl public-read 
+
+aws --region us-west-2 s3api put-bucket-policy --bucket replic.us --policy file://bucketpolicy.json
+
+policy:
+
+{
+   "Version":"2012-10-17",
+   "Id":"PolicyForCloudFrontPrivateContent",
+   "Statement":[
+     {
+       "Sid":" Grant a CloudFront Origin Identity access to support private content",
+       "Effect":"Allow",
+       "Principal":{"CanonicalUser":"CloudFront Origin Identity Canonical User ID"},
+       "Action":"s3:GetObject",
+       "Resource":"arn:aws:s3:::examplebucket/*"
+     }
+   ]
+}
+
+
+❯ aws --region us-east-1 s3api create-bucket --bucket replic.us --acl public-read
+{
+    "Location": "/replic.us"
+}
+
+aws --region us-east-1 s3api put-bucket-website --bucket replic.us --website-configuration '{ "IndexDocument": { "Suffix": "index.html" }, "ErrorDocument": { "Key": "index.html" } }'
+no stdoutput
+
+aws cloudfront create-distribution --origin-domain-name replic.us.s3.amazonaws.com --default-root-object index.html
+
+❯ aws cloudfront create-distribution --origin-domain-name replic.us.s3.amazonaws.com --default-root-object index.html
+{
+    "Location": "https://cloudfront.amazonaws.com/2018-06-18/distribution/E3JAY875UN17EY",
+    "ETag": "E14B8AT3DR9SYF",
+    "Distribution": {
+        "Id": "E3JAY875UN17EY",
+        "ARN": "arn:aws:cloudfront::428807192824:distribution/E3JAY875UN17EY",
+        "Status": "InProgress",
+        "LastModifiedTime": "2018-11-24T23:46:04.982Z",
+        "InProgressInvalidationBatches": 0,
+        "DomainName": "dzjnvbhvgexju.cloudfront.net",
+        "ActiveTrustedSigners": {
+            "Enabled": false,
+            "Quantity": 0
+        },
+        "DistributionConfig": {
+            "CallerReference": "cli-1543103166-135096",
+            "Aliases": {
+                "Quantity": 0
+            },
+            "DefaultRootObject": "index.html",
+            "Origins": {
+                "Quantity": 1,
+                "Items": [
+                    {
+                        "Id": "replic.us.s3.amazonaws.com-1543103166-588745",
+                        "DomainName": "replic.us.s3.amazonaws.com",
+                        "OriginPath": "",
+                        "CustomHeaders": {
+                            "Quantity": 0
+                        },
+                        "S3OriginConfig": {
+                            "OriginAccessIdentity": ""
+                        }
+                    }
+                ]
+            },
+            "DefaultCacheBehavior": {
+                "TargetOriginId": "replic.us.s3.amazonaws.com-1543103166-588745",
+                "ForwardedValues": {
+                    "QueryString": false,
+                    "Cookies": {
+                        "Forward": "none"
+                    },
+                    "Headers": {
+                        "Quantity": 0
+                    },
+                    "QueryStringCacheKeys": {
+                        "Quantity": 0
+                    }
+                },
+                "TrustedSigners": {
+                    "Enabled": false,
+                    "Quantity": 0
+                },
+                "ViewerProtocolPolicy": "allow-all",
+                "MinTTL": 0,
+                "AllowedMethods": {
+                    "Quantity": 2,
+                    "Items": [
+                        "HEAD",
+                        "GET"
+                    ],
+                    "CachedMethods": {
+                        "Quantity": 2,
+                        "Items": [
+                            "HEAD",
+                            "GET"
+                        ]
+                    }
+                },
+                "SmoothStreaming": false,
+                "DefaultTTL": 86400,
+                "MaxTTL": 31536000,
+                "Compress": false,
+                "LambdaFunctionAssociations": {
+                    "Quantity": 0
+                },
+                "FieldLevelEncryptionId": ""
+            },
+            "CacheBehaviors": {
+                "Quantity": 0
+            },
+            "CustomErrorResponses": {
+                "Quantity": 0
+            },
+            "Comment": "",
+            "Logging": {
+                "Enabled": false,
+                "IncludeCookies": false,
+                "Bucket": "",
+                "Prefix": ""
+            },
+            "PriceClass": "PriceClass_All",
+            "Enabled": true,
+            "ViewerCertificate": {
+                "CloudFrontDefaultCertificate": true,
+                "MinimumProtocolVersion": "TLSv1",
+                "CertificateSource": "cloudfront"
+            },
+            "Restrictions": {
+                "GeoRestriction": {
+                    "RestrictionType": "none",
+                    "Quantity": 0
+                }
+            },
+            "WebACLId": "",
+            "HttpVersion": "http2",
+            "IsIPV6Enabled": true
+        }
+    }
+}
+
+aws route53domains --domain-name replic.us --duration-in-years 1 --no-auto-renew --admin-contact file://contact.json --registrant-contact file://contact.json --tech-contact file://contact.json
+
+aws --region us-east-1 route53domains register-domain --domain-name replic.us --duration-in-years 1 --no-auto-renew --admin-contact file://contact.json --registrant-contact file://contact.json --tech-contact file://contact.json
+{
+    "OperationId": "6cbad2b2-9984-4709-acc8-6a228149f656"
+}
+
+aws route53domains get-operation-detail --operation-id 6cbad2b2-9984-4709-acc8-6a228149f656
+
+aws --region=us-east-1 route53domains get-operation-detail --operation-id 6cbad2b2-9984-4709-acc8-6a228149f656
+{
+    "OperationId": "6cbad2b2-9984-4709-acc8-6a228149f656",
+    "Status": "IN_PROGRESS",
+    "DomainName": "replic.us",
+    "Type": "REGISTER_DOMAIN",
+    "SubmittedDate": 1543107493.013
+}
+
+❯ nslookup -n replic.us 8.8.8.8
+Server:         8.8.8.8
+Address:        8.8.8.8#53
+
+** server can't find replic.us: NXDOMAIN
+
+4-4709-acc8-6a228149f656                                               Z --change-batch=file://change-reso/usr/lib/python3/dist-packages/requests/__init__.py:80: RequestsDepende
+ncyWarning: urlli                                                      ncyWarning: urllib3 (1.24.1) or chab3 (1.24.1) or chardet (3.0.4) doesn't match a supported version!❯ aws --region=us-east-1 route53domains get-operation-detail --operation-id 6cbad2b2-99
+84-4709-acc8-6a228149f656
+/usr/lib/python3/dist-packages/requests/__init__.py:80: RequestsDepende
+ncyWarning: urll
+ib3 (1.24.1) or chardet (3.0.4) doesn't match a supported version!
+❯ aws --region=us-east-1 route53domains get-operation-detail --operatio
+n-id 6cbad2b2
+-9984-4709-acc8-6a228149f656
+/usr/lib/python3/dist-packages/requests/__init__.py:80: RequestsDepende
+ncyWarning: u                                                          Z --change-batch=file://change-resorllib3 (1.24.1) or chardet (3.0.4) doesn't match a supported version!
+❯ aws --region=us-east-1 route53domains get-operation-detail --operationcyWarning: urllib3 (1.24.1) or chan-
+id 6cbad2b2-9984-4709-acc8-6a228149f656/usr/lib/python3/dist-packages/requests/__init__.py:80: RequestsDependenc
+yWarning: urllib3 (1.24.1) or chardet (3.0.4) doesn't match a supported
+ v
+ersion!
+  RequestsDependencyWarning)
+❯ aws --region=us-east-1 route53domains get-operation-detail --operatio
+n   "OperationId": "6cbad2b2-9984-4709-acc8-6a228149f656",
+-id 6cbad2b2-9984-4709-acc8-6a228149f656
+/usr/
